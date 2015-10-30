@@ -110,15 +110,15 @@ proto_del_data (proto_data_t *data)
 #endif
 
 typedef struct proto_hashmap_entry {
-  char *key;
-  void *value;
-  struct proto_hashmap_entry **left;
-  struct proto_hashmap_entry **right;
+  const char *key;
+  const void *value;
+  struct proto_hashmap_entry *left;
+  struct proto_hashmap_entry *right;
   bool should_free_value;
 } proto_hashmap_entry_t;
 
 static unsigned long
-proto_hash_code (unsigned char *str)
+proto_hash_code (const char *str)
 {
   unsigned long hash = 5381;
   int c;
@@ -153,8 +153,8 @@ proto_btree_insert (proto_hashmap_entry_t **root,
 
 static void
 proto_set_own_property (void *self,
-                        char *key,
-                        void *value)
+                        const char *key,
+                        const void *value)
 {
   proto_object_t *object = (proto_object_t *) self;
   proto_hashmap_entry_t *entry;
@@ -165,12 +165,12 @@ proto_set_own_property (void *self,
   entry->left = NULL;
   entry->right = NULL;
   entry->should_free_value = false;
-  proto_btree_insert (&object->prototype[hash], entry);
+  proto_btree_insert ((proto_hashmap_entry_t **) &object->prototype[hash], entry);
 }
 
 static proto_hashmap_entry_t *
 proto_btree_retrieve (proto_hashmap_entry_t **root,
-                      char *key)
+                      const char *key)
 {
   if ((*root) == NULL)
     {
@@ -187,31 +187,31 @@ proto_btree_retrieve (proto_hashmap_entry_t **root,
     return proto_btree_retrieve (&(*root)->right, key);
 }
 
-static void *
-proto_get_own_property (void *self,
-                        char *key)
+static const void *
+proto_get_own_property (const void *self,
+                        const char *key)
 {
-  int strcmp_value;
   proto_object_t *object = (proto_object_t *) self;
   unsigned long hash = proto_hash_code (key) % object->prototype_size;
-  proto_hashmap_entry_t *entry = proto_btree_retrieve (&object->prototype[hash], key);
+  proto_hashmap_entry_t *entry = proto_btree_retrieve ((proto_hashmap_entry_t **) &object->prototype[hash], key);
   if (entry == NULL)
     return NULL;
   return entry->value;
 }
 
 static bool
-proto_has_own_property (void *self,
-                        char *key)
+proto_has_own_property (const void *self,
+                        const char *key)
 {
   proto_object_t *object = (proto_object_t *) self;
-  proto_hashmap_entry_t *entry = proto_get_own_property (object, key);
+  unsigned long hash = proto_hash_code (key) % object->prototype_size;
+  proto_hashmap_entry_t *entry = proto_btree_retrieve ((proto_hashmap_entry_t **) &object->prototype[hash], key);
   if (entry == NULL)
     return false;
   return true;
 }
 
-proto_hashmap_entry_t *
+static proto_hashmap_entry_t *
 proto_find_minimal (proto_hashmap_entry_t *root)
 {
   proto_hashmap_entry_t *tmp = root;
@@ -220,9 +220,9 @@ proto_find_minimal (proto_hashmap_entry_t *root)
   return tmp;
 }
 
-proto_hashmap_entry_t *
+static proto_hashmap_entry_t *
 proto_btree_delete (proto_hashmap_entry_t *root,
-                    char *key)
+                    const char *key)
 {
   if (root == NULL)
     return root;
@@ -262,7 +262,7 @@ proto_btree_delete (proto_hashmap_entry_t *root,
 }
 
 static void
-proto_print_btree (proto_hashmap_entry_t *root)
+proto_print_btree (const proto_hashmap_entry_t *root)
 {
   int value;
 
@@ -277,18 +277,18 @@ proto_print_btree (proto_hashmap_entry_t *root)
   proto_print_btree (root->right);
 }
 
-static void *
+static const void *
 proto_del_own_property (void *self,
-                        char *key)
+                        const char *key)
 {
-  void *value;
+  const void *value;
   proto_object_t *object = (proto_object_t *) self;
   unsigned long hash = proto_hash_code (key) % object->prototype_size;
-  proto_hashmap_entry_t *entry = proto_btree_retrieve (&object->prototype[hash], key);
+  proto_hashmap_entry_t *entry = proto_btree_retrieve ((proto_hashmap_entry_t **) &object->prototype[hash], key);
   if (entry == NULL)
     return NULL;
   value = entry->value;
-  object->prototype[hash] = proto_btree_delete (object->prototype[hash], key);
+  object->prototype[hash] = proto_btree_delete ((proto_hashmap_entry_t *) object->prototype[hash], key);
   return value;
 }
 

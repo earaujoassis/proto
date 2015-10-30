@@ -52,6 +52,26 @@ test_object_reassignment_of_key ()
 }
 
 void
+test_object_with_pointer ()
+{
+  proto_object_t *object;
+  int *pointer, *deleted;
+
+  describe ("Create object and assign a key to a pointer");
+  object = proto_init_object ();
+  should_be_true (object != NULL);
+  pointer = (int *) malloc (sizeof (int));
+  *pointer = 200;
+  object->set_own_property (object, "pointer", pointer);
+  should_be_true (object->has_own_property (object, "pointer"));
+  should_equal ((int *) object->get_own_property (object, "pointer"), pointer);
+  should_equal (*(int *) object->get_own_property (object, "pointer"), 200);
+  deleted = (int *) object->del_own_property (object, "pointer");
+  free (deleted);
+  proto_del_object (object);
+}
+
+void
 test_object_with_multiple_keys ()
 {
   proto_object_t *object;
@@ -154,6 +174,7 @@ run_tests ()
 {
   test_object_creation ();
   test_object_reassignment_of_key ();
+  test_object_with_pointer ();
   test_object_with_multiple_keys ();
   test_object_with_colliding_keys ();
   test_object_deletion_of_key ();

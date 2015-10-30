@@ -43,11 +43,11 @@ typedef struct {
 } proto_data_t;
 
 typedef struct {
-  bool (*has_own_property) (void *self, char *key);
-  void *(*get_own_property) (void *self, char *key);
-  void (*set_own_property) (void *self, char *key, void *value);
-  void *(*del_own_property) (void *self, char *key);
-  void *(*chain) (void *self, char *keys);
+  bool (*has_own_property) (const void *self, const char *key);
+  const void *(*get_own_property) (const void *self, const char *key);
+  void (*set_own_property) (void *self, const char *key, const void *value);
+  const void *(*del_own_property) (void *self, const char *key);
+  const void *(*chain) (void *self, const char *keys);
   size_t prototype_size;
   void **prototype;
 } proto_object_t;
