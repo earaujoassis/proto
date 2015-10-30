@@ -1,0 +1,5 @@
+# variables Makefile
+
+VERSION=0.1.0
+VERSION.MAJOR=0
+VERSION.MINOR=1.0

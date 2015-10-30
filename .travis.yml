@@ -1,0 +1,9 @@
+branches:
+  only:
+    - master
+language: c
+compiler: gcc
+script:
+  - make tests
+  - tests/scripts/run.py
+  - tests/scripts/valgrind.py
