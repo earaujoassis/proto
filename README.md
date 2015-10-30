@@ -1,6 +1,6 @@
 # Proto [![Build Status](https://travis-ci.org/earaujoassis/proto.svg)](https://travis-ci.org/earaujoassis/proto)
 
-> A prototype-based programming library for the C language
+> A Prototype-Based Programming library for the C language
 
 ## Testing
 
