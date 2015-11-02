@@ -14,7 +14,7 @@ void
 test_array_creation ()
 {
   proto_array_t *array;
-  int value = 10;
+  short int value = 10;
 
   describe ("Create and destroy array");
   array = proto_init_array ();
@@ -28,7 +28,7 @@ void
 test_array_insert ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -79,7 +79,7 @@ void
 test_array_at ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -166,7 +166,7 @@ test_array_del ()
 {
 
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40;
@@ -197,7 +197,7 @@ void
 test_array_index ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -248,7 +248,7 @@ void
 test_array_push ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -275,7 +275,7 @@ void
 test_array_pop ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -302,7 +302,7 @@ void
 test_array_unshift ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -329,7 +329,7 @@ void
 test_array_shift ()
 {
   proto_array_t *array;
-  int value_a = 10,
+  short int value_a = 10,
     value_b = 20,
     value_c = 30,
     value_d = 40,
@@ -377,6 +377,72 @@ test_array_stress ()
 }
 
 void
+test_array_concat ()
+{
+  proto_array_t *array, *another;
+  short int value_a = 1,
+    value_b = 2,
+    value_c = 3,
+    value_d = 4;
+
+  describe ("Concat one array into another");
+  array = proto_init_array ();
+  array->push (array, &value_a);
+  array->push (array, &value_b);
+  should_equal (array->length, 2);
+  another = proto_init_array ();
+  another->push (another, &value_c);
+  another->push (another, &value_d);
+  should_equal (another->length, 2);
+  array->concat (array, another);
+  should_equal (array->length, 4);
+  should_equal (*(short int *) array->first (array), 1);
+  should_equal (*(short int *) array->at (array, 1), 2);
+  should_equal (*(short int *) array->at (array, 2), 3);
+  should_equal (*(short int *) array->last (array), 4);
+  should_equal (another->length, 2);
+  proto_del_array (another);
+  proto_del_array (array);
+}
+
+void
+test_array_reverse ()
+{
+  proto_array_t *array, *reversed;
+  short int value_a = 1,
+    value_b = 2,
+    value_c = 3,
+    value_d = 4,
+    value_e = 5;
+
+  describe ("Reverse an array");
+  array = proto_init_array ();
+  should_be_true (array != NULL);
+  should_equal (array->length, 0);
+  reversed = array->reverse (array);
+  should_be_true (reversed != NULL);
+  should_equal (reversed->length, 0);
+  proto_del_array (reversed);
+  array->push (array, &value_a);
+  array->push (array, &value_b);
+  array->push (array, &value_c);
+  array->push (array, &value_d);
+  array->push (array, &value_e);
+  should_equal (array->length, 5);
+  should_equal (*(short int *) array->first (array), 1);
+  should_equal (*(short int *) array->at (array, 2), 3);
+  should_equal (*(short int *) array->last (array), 5);
+  reversed = array->reverse (array);
+  should_be_true (reversed != NULL);
+  should_equal (reversed->length, 5);
+  should_equal (*(short int *) reversed->first (reversed), 5);
+  should_equal (*(short int *) reversed->at (reversed, 2), 3);
+  should_equal (*(short int *) reversed->last (reversed), 1);
+  proto_del_array (reversed);
+  proto_del_array (array);
+}
+
+void
 run_tests ()
 {
   test_array_creation ();
@@ -389,4 +455,6 @@ run_tests ()
   test_array_unshift ();
   test_array_shift ();
   test_array_stress ();
+  test_array_concat ();
+  test_array_reverse ();
 }

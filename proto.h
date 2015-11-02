@@ -99,6 +99,8 @@ typedef struct {
   const void *(*shift) (void *self);
   const void *(*first) (const void *self);
   const void *(*last) (const void *self);
+  void (*concat) (void *self, const void *list);
+  void *(*reverse) (const void *self);
 } proto_array_t;
 
 proto_data_t *

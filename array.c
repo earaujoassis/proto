@@ -15,6 +15,9 @@
 #define ARRAY_ITEMS_SIZE 4
 #endif
 
+static void
+proto_array_methods (proto_array_t *array);
+
 /*
  * It uses the same strategy defined in Python implementation of lists.
  * Allocation expansion follows: 4, 8, 16, 25, 35, 46, 58, 72, 88, ...
@@ -197,6 +200,69 @@ proto_last (const void *self)
   return array->at (array, array->length - 1);
 }
 
+static void
+proto_concat (void *self,
+              const void *list)
+{
+  if (self == NULL)
+    return;
+  size_t i;
+  proto_array_t *array = (proto_array_t *) self;
+  const proto_array_t *another = (const proto_array_t *) list;
+
+  if (another == NULL || !another->length)
+    return;
+  for (i = 0; i < another->length; i++)
+    array->push (array, another->at (another, i));
+}
+
+static void *
+proto_reverse (const void *self)
+{
+  if (self == NULL)
+    return NULL;
+  signed long int i;
+  proto_array_t *array = (proto_array_t *) self;
+  proto_array_t *reverse = (proto_array_t *) malloc (sizeof (proto_array_t));
+
+  if (!reverse)
+    return NULL;
+  reverse->allocated = array->allocated;
+  reverse->length = 0;
+  reverse->items = (void **) calloc (reverse->allocated, sizeof (void *));
+  if (!reverse->items)
+    {
+      free (reverse);
+      return NULL;
+    }
+  for (i = 0; i < reverse->allocated; i++)
+    reverse->items[i] = NULL;
+  proto_array_methods (reverse);
+  for (i = array->length - 1; i >= 0; i--)
+    reverse->push (reverse, array->at (array, i));
+  return reverse;
+}
+
+static void
+proto_array_methods (proto_array_t *array)
+{
+  if (array == NULL)
+    return;
+  array->insert = &proto_insert;
+  array->includes = &proto_includes;
+  array->at = &proto_at;
+  array->del = &proto_del;
+  array->index = &proto_index;
+  array->push = &proto_push;
+  array->pop = &proto_pop;
+  array->unshift = &proto_unshift;
+  array->shift = &proto_shift;
+  array->first = &proto_first;
+  array->last = &proto_last;
+  array->concat = &proto_concat;
+  array->reverse = &proto_reverse;
+}
+
 proto_array_t *
 proto_init_array ()
 {
@@ -215,17 +281,7 @@ proto_init_array ()
     }
   for (i = 0; i < ARRAY_ITEMS_SIZE; i++)
     array->items[i] = NULL;
-  array->insert = &proto_insert;
-  array->includes = &proto_includes;
-  array->at = &proto_at;
-  array->del = &proto_del;
-  array->index = &proto_index;
-  array->push = &proto_push;
-  array->pop = &proto_pop;
-  array->unshift = &proto_unshift;
-  array->shift = &proto_shift;
-  array->first = &proto_first;
-  array->last = &proto_last;
+  proto_array_methods (array);
   return array;
 }
 
