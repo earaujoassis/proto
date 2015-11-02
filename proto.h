@@ -5,8 +5,8 @@
 // This library is free software; you can redistribute it and/or modify
 // it under the terms of the MIT license. See LICENSE for details.
 
-#ifndef __proto_datastructures_h__
-#define __proto_datastructures_h__
+#ifndef __proto_library_h__
+#define __proto_library_h__
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -15,15 +15,46 @@
 extern "C" {
 #endif // __cplusplus
 
+#ifndef T_DECIMAL
+#define T_DECIMAL(d) proto_decimal (d)
+#endif
+#ifndef T_INTEGER
+#define T_INTEGER(d) proto_integer (d)
+#endif
+#ifndef T_STRING
+#define T_STRING(d) proto_string (d)
+#endif
+#ifndef T_OBJECT
+#define T_OBJECT(d) proto_object (d)
+#endif
+#ifndef T_ARRAY
+#define T_ARRAY(d) proto_array (d)
+#endif
+#ifndef T_BOOLEAN
+#define T_BOOLEAN(d) proto_boolean (d)
+#endif
+#ifndef T_FUNCTION
+#define T_FUNCTION(d) proto_function (d)
+#endif
+#ifndef T_POINTER
+#define T_POINTER(d) proto_pointer (d)
+#endif
+#ifndef TYPE_OF
+#define TYPE_OF(v) v->type
+#endif
+#ifndef VALUE
+#define VALUE(d) proto_data_value (d)
+#endif
+
 typedef enum {
-  decimal_t,
-  integer_t,
-  string_t,
-  object_t,
-  list_t,
-  boolean_t,
-  function_t,
-  pointer_t
+  decimal_t  = 0x00,
+  integer_t  = 0x01,
+  string_t   = 0x02,
+  object_t   = 0x03,
+  array_t    = 0x04,
+  boolean_t  = 0x05,
+  function_t = 0x06,
+  pointer_t  = 0x07
 } proto_type_t;
 
 typedef union {
@@ -31,26 +62,44 @@ typedef union {
   long integer;
   char *string;
   void *object;
-  void *list;
+  void *array;
   bool boolean;
   void *(*function) (void *arguments);
   void *pointer;
-} proto_variable_t;
+} proto_typed_data_t;
 
 typedef struct {
   proto_type_t type;
-  proto_variable_t data;
+  proto_typed_data_t data;
 } proto_data_t;
 
 typedef struct {
-  bool (*has_own_property) (const void *self, const char *key);
-  const void *(*get_own_property) (const void *self, const char *key);
-  void (*set_own_property) (void *self, const char *key, const void *value);
-  const void *(*del_own_property) (void *self, const char *key);
-  const void *(*chain) (void *self, const char *keys);
   size_t prototype_size;
   void **prototype;
+  void (*set_own_property) (void *self, const char *key, const void *value);
+  const void *(*get_own_property) (const void *self, const char *key);
+  bool (*has_own_property) (const void *self, const char *key);
+  const void *(*del_own_property) (void *self, const char *key);
+  const void *(*chain) (void *self, const char *keys);
+  const void *(*execute_property) (void *self, const char *key, const void *arguments);
 } proto_object_t;
+
+typedef struct {
+  size_t allocated;
+  size_t length;
+  void **items;
+  void (*insert) (void *self, size_t position, const void *element);
+  bool (*includes) (const void *self, const void *element);
+  const void *(*at) (const void *self, size_t position);
+  const void *(*del) (void *self, size_t position);
+  size_t (*index) (const void *self, const void *element);
+  void (*push) (void *self, const void *element);
+  const void *(*pop) (void *self);
+  void (*unshift) (void *self, const void *element);
+  const void *(*shift) (void *self);
+  const void *(*first) (const void *self);
+  const void *(*last) (const void *self);
+} proto_array_t;
 
 proto_data_t *
 proto_decimal (double data);
@@ -65,7 +114,7 @@ proto_data_t *
 proto_object (void *data);
 
 proto_data_t *
-proto_list (void *data);
+proto_array (void *data);
 
 proto_data_t *
 proto_boolean (bool data);
@@ -85,8 +134,49 @@ proto_init_object ();
 void
 proto_del_object (proto_object_t *object);
 
+proto_array_t *
+proto_init_array ();
+
+void
+proto_del_array (proto_array_t *array);
+
+static inline void *
+proto_data_value (proto_data_t *data)
+{
+  if (data == NULL)
+    return NULL;
+  switch (data->type)
+    {
+      case decimal_t:
+        return &data->data.decimal;
+        break;
+      case integer_t:
+        return &data->data.integer;
+        break;
+      case string_t:
+        return data->data.string;
+        break;
+      case object_t:
+        return data->data.object;
+        break;
+      case array_t:
+        return data->data.array;
+        break;
+      case boolean_t:
+        return &data->data.boolean;
+        break;
+      case function_t:
+        return data->data.function;
+        break;
+      case pointer_t:
+        return data->data.pointer;
+        break;
+    }
+  return NULL;
+}
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
 
-#endif // __proto_datastructures_h__
+#endif // __proto_library_h__
