@@ -7,6 +7,11 @@ install:
   - sudo apt-get update -qq
   - sudo apt-get install -y -qq valgrind
 script:
+  - autoreconf -i
+  - mkdir -p build
+  - ./configure --prefix=$PWD/build
+  - make
+  - make install
   - make tests
-  - tests/scripts/run.py
   - tests/scripts/valgrind.py
+  - tests/scripts/run.py

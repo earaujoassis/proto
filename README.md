@@ -2,12 +2,23 @@
 
 > A Prototype-Based Programming library for the C language
 
-## Testing
+## Build & Install
+
+You must install Autotools before attempting to build & install it.
+
+```sh
+$ autoreconf -i
+$ ./configure
+$ make
+$ make install
+```
+
+## Tests
 
 ```sh
 $ make tests
-$ tests/scripts/run.py
 $ tests/scripts/valgrind.py
+$ tests/scripts/run.py
 ```
 
 ## License

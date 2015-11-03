@@ -1,0 +1,15 @@
+EXPORTS
+    proto_decimal
+    proto_integer
+    proto_string
+    proto_object
+    proto_array
+    proto_boolean
+    proto_function
+    proto_pointer
+    proto_del_data
+    proto_init_object
+    proto_del_object
+    proto_init_array
+    proto_del_array
+    proto_generic_caller

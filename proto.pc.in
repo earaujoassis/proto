@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=${prefix}/include
+
+Name: Proto
+Description: A Prototype-Based Programming library for the C language
+Version: @VERSION@
+Libs: -L${libdir} -lproto
+Cflags: -I${includedir}
