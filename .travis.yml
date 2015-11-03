@@ -12,7 +12,7 @@ install:
 script:
   - autoreconf -i
   - mkdir -p build
-  - ./configure --prefix=$PWD/build
+  - ./configure --prefix=$PWD/build --disable-shared
   - make
   - make install
   - make tests
