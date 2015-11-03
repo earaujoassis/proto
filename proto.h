@@ -79,6 +79,7 @@ typedef struct {
 typedef struct {
   size_t prototype_size;
   void **prototype;
+  void *super;
   void (*set_own_property) (void *self, const char *key, const void *value);
   const void *(*get_own_property) (const void *self, const char *key);
   bool (*has_own_property) (const void *self, const char *key);

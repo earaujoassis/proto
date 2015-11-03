@@ -89,9 +89,7 @@ proto_btree_retrieve (proto_hashmap_entry_t **root,
   int strcmp_value = strcmp (key, (*root)->key);
 
   if (!strcmp_value)
-    {
-      return *root;
-    }
+    return *root;
   if (strcmp_value < 0)
     return proto_btree_retrieve (&(*root)->left, key);
    else // strcmp_value > 0
@@ -125,7 +123,7 @@ proto_has_own_property (const void *self,
 }
 
 static proto_hashmap_entry_t *
-proto_find_minimal (proto_hashmap_entry_t *root)
+proto_btree_find_minimal (proto_hashmap_entry_t *root)
 {
   proto_hashmap_entry_t *tmp = root;
 
@@ -167,7 +165,7 @@ proto_btree_delete (proto_hashmap_entry_t *root,
         }
       else
         {
-          proto_hashmap_entry_t *garbage = proto_find_minimal (root->right);
+          proto_hashmap_entry_t *garbage = proto_btree_find_minimal (root->right);
           root->value = garbage->value;
           root->should_free_value = garbage->should_free_value;
           root->right = proto_btree_delete (root->right, key);
@@ -269,6 +267,7 @@ proto_init_object ()
 
   if (!object)
     return NULL;
+  object->super = NULL;
   object->prototype_size = OBJECT_PROTOTYPE_SIZE;
   object->prototype = (void **) calloc (OBJECT_PROTOTYPE_SIZE, sizeof (proto_hashmap_entry_t *));
   if (!object->prototype)
