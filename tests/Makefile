@@ -9,7 +9,7 @@ TESTSBINPATH=$(realpath .)/bin
 
 CC=gcc
 CC_INCLUDES=-I$(INCLUDEPATH)
-CC_SOURCES=$(INCLUDEPATH)/data_types.c $(INCLUDEPATH)/object.c $(INCLUDEPATH)/array.c
+CC_SOURCES=$(INCLUDEPATH)/data_types.c $(INCLUDEPATH)/object.c $(INCLUDEPATH)/array.c $(INCLUDEPATH)/functions.c
 CC_LIBRARIES=
 CC_FLAGS=-g
 
@@ -20,6 +20,7 @@ build:
 	$(CC) $(CC_FLAGS) $(SUITES_PATH)/test_arrays.c -o $(TESTSBINPATH)/test_arrays $(CC_INCLUDES) $(CC_LIBRARIES) $(CC_SOURCES)
 	$(CC) $(CC_FLAGS) $(SUITES_PATH)/test_data_types.c -o $(TESTSBINPATH)/test_data_types $(CC_INCLUDES) $(CC_LIBRARIES) $(CC_SOURCES)
 	$(CC) $(CC_FLAGS) $(SUITES_PATH)/test_objects.c -o $(TESTSBINPATH)/test_objects $(CC_INCLUDES) $(CC_LIBRARIES) $(CC_SOURCES)
+	$(CC) $(CC_FLAGS) $(SUITES_PATH)/test_generic_caller.c -o $(TESTSBINPATH)/test_generic_caller $(CC_INCLUDES) $(CC_LIBRARIES) $(CC_SOURCES)
 
 clean:
 	rm -rf $(TESTSBINPATH)

@@ -25,8 +25,8 @@ test_data_types ()
 
   describe ("Create proto_data_t for decimal");
   data = proto_decimal (10.0);
-  should_equal(data->type, decimal_t);
-  should_equal(data->data.decimal, 10.0);
+  should_equal (data->type, decimal_t);
+  should_equal (data->data.decimal, 10.0);
   proto_del_data (data);
 
   describe ("Create proto_data_t for integer");
@@ -89,14 +89,14 @@ test_data_types_macros ()
 
   describe ("Create proto_data_t for decimal");
   data = T_DECIMAL (10.0);
-  should_equal(TYPE_OF (data), decimal_t);
-  should_equal(*(double *) VALUE (data), 10.0);
+  should_equal (TYPE_OF (data), decimal_t);
+  should_equal (TYPED_VALUE (data, double), 10.0);
   proto_del_data (data);
 
   describe ("Create proto_data_t for integer");
   data = T_INTEGER (10);
   should_equal (TYPE_OF (data), integer_t);
-  should_equal (*(long *) VALUE (data), 10);
+  should_equal (TYPED_VALUE (data, long), 10);
   proto_del_data (data);
 
   describe ("Create proto_data_t for string");
@@ -126,7 +126,7 @@ test_data_types_macros ()
   describe ("Create proto_data_t for boolean");
   data = T_BOOLEAN (true);
   should_equal (TYPE_OF (data), boolean_t);
-  should_equal (*(bool *) VALUE (data), true);
+  should_equal (TYPED_VALUE (data, bool), true);
   proto_del_data (data);
 
   describe ("Create proto_data_t for function");
@@ -140,7 +140,7 @@ test_data_types_macros ()
   data = T_POINTER (&pointed);
   should_equal (TYPE_OF (data), pointer_t);
   should_equal (VALUE (data), &pointed);
-  should_equal (*(int *) VALUE (data), pointed);
+  should_equal (TYPED_VALUE (data, int), pointed);
   proto_del_data (data);
 }
 

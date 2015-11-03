@@ -45,6 +45,9 @@ extern "C" {
 #ifndef VALUE
 #define VALUE(d) proto_data_value (d)
 #endif
+#ifndef TYPED_VALUE
+#define TYPED_VALUE(d, mode) *(mode *) (void *) proto_data_value (d)
+#endif
 
 typedef enum {
   decimal_t  = 0x00,
@@ -141,6 +144,10 @@ proto_init_array ();
 
 void
 proto_del_array (proto_array_t *array);
+
+void *
+proto_generic_caller (const char *arguments,
+                      void *(*function) (const void *arguments), ...);
 
 static inline void *
 proto_data_value (proto_data_t *data)
