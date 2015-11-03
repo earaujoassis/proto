@@ -18,3 +18,5 @@ build:
 
 clean:
 	rm -rf bin
+	rm -f Makefile Makefile.in
+	rm -f scripts/*.pyc
