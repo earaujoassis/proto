@@ -259,6 +259,14 @@ proto_execute_property (void *self,
   return NULL;
 }
 
+void
+proto_set_super (void *self,
+                 const void *reference)
+{
+  proto_object_t *object = (proto_object_t *) self;
+  object->super = (proto_object_t *) reference;
+}
+
 proto_object_t *
 proto_init_object ()
 {
@@ -283,6 +291,7 @@ proto_init_object ()
   object->del_own_property = &proto_del_own_property;
   object->chain = &proto_chain;
   object->execute_property = &proto_execute_property;
+  object->set_super = &proto_set_super;
   return object;
 }
 
