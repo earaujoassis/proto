@@ -65,6 +65,8 @@ proto_set_own_property (void *self,
                         const char *key,
                         const void *value)
 {
+  if (key == NULL)
+    return;
   proto_object_t *object = (proto_object_t *) self;
   proto_hashmap_entry_t *entry;
   unsigned long hash = proto_hash_code (key) % object->prototype_size;
@@ -289,7 +291,7 @@ proto_set_chain (void *self,
 }
 
 static const void *
-proto_get_chain (void *self,
+proto_get_chain (const void *self,
                  const char *keys)
 {
   proto_object_t *object;
@@ -324,6 +326,17 @@ proto_get_chain (void *self,
         value = NULL;
     }
   return value;
+}
+
+static bool
+proto_has_chain (const void *self,
+                 const char *keys)
+{
+  proto_object_t *object = (proto_object_t *) self;
+
+  if (object->get_chain (object, keys) != NULL)
+    return true;
+  return false;
 }
 
 static const void *
@@ -418,6 +431,7 @@ proto_init_object ()
   object->del_own_property = &proto_del_own_property;
   object->set_chain = &proto_set_chain;
   object->get_chain = &proto_get_chain;
+  object->has_chain = &proto_has_chain;
   object->execute_property = &proto_execute_property;
   object->set_super = &proto_set_super;
   object->merge = &proto_merge;

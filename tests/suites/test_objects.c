@@ -322,6 +322,36 @@ test_object_merge ()
 }
 
 void
+test_object_merge_chain ()
+{
+  proto_object_t *object_a, *object_b;
+  short int value_a = 10, value_b = 20, value_c = 30, value_d = 40;
+
+  describe ("Create one object, assign some keys and then merge it with another object");
+  object_a = proto_init_object ();
+  object_b = proto_init_object ();
+
+  object_a->set_own_property (object_a, "value_a", &value_a);
+  object_a->set_chain (object_a, "tests.value_b", &value_b);
+  object_a->set_chain (object_a, "tests.value_c", &value_b);
+  object_a->set_own_property (object_a, "value_d", &value_d);
+  should_be_true (object_a->has_chain (object_a, "value_a"));
+  should_be_true (object_a->has_chain (object_a, "tests.value_b"));
+  should_be_true (object_a->has_chain (object_a, "tests.value_c"));
+  should_be_true (object_a->has_chain (object_a, "value_d"));
+  object_b->merge (object_b, object_a->get_own_property (object_a, "tests"));
+  should_be_true (object_b->has_chain (object_b, "value_b"));
+  should_be_true (object_b->has_chain (object_b, "value_c"));
+  should_be_true (object_b->has_own_property (object_b, "value_b"));
+  should_be_true (object_b->has_own_property (object_b, "value_c"));
+  should_be_false (object_b->has_own_property (object_b, "value_a"));
+  should_be_false (object_b->has_own_property (object_b, "value_d"));
+
+  proto_del_object (object_a);
+  proto_del_object (object_b);
+}
+
+void
 run_tests ()
 {
   test_object_creation ();
@@ -336,4 +366,5 @@ run_tests ()
   test_object_set_chain_reassignments ();
   test_object_execute_function ();
   test_object_merge ();
+  test_object_merge_chain ();
 }
