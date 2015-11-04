@@ -26,6 +26,6 @@ clean:
 	rm -rf build
 	rm -rf m4
 	rm -f .DS_Store *.lo *.o aclocal.m4 autoscan.log
-	rm -f compile config.guess config.h config.log config.status config.sub configure
+	rm -f compile config.guess config.h config.h.in~ config.log config.status config.sub configure
 	rm -f depcomp install-sh libproto.la libtool ltmain.sh
 	rm -f Makefile Makefile.in missing proto.pc stamp-h1

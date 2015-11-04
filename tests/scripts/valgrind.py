@@ -10,5 +10,5 @@ from run import run_binaries
 
 
 if __name__ == '__main__':
-    code = run_binaries("valgrind --leak-check=yes --error-exitcode={0}".format(os.EX_SOFTWARE))
+    code = run_binaries("valgrind --leak-check=yes --leak-check=full --show-leak-kinds=all --error-exitcode={0} -v".format(os.EX_SOFTWARE))
     sys.exit(code)

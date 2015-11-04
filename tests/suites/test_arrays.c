@@ -6,7 +6,6 @@
 // it under the terms of the MIT license. See LICENSE for details.
 
 #include <proto.h>
-#include <string.h>
 
 #include "utils.h"
 

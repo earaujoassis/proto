@@ -84,7 +84,8 @@ typedef struct {
   const void *(*get_own_property) (const void *self, const char *key);
   bool (*has_own_property) (const void *self, const char *key);
   const void *(*del_own_property) (void *self, const char *key);
-  const void *(*chain) (void *self, const char *keys);
+  const void *(*get_chain) (void *self, const char *keys);
+  void (*set_chain) (void *self, const char *keys, const void *value);
   const void *(*execute_property) (void *self, const char *key, const void *arguments);
   void (*set_super) (void *self, const void *reference);
 } proto_object_t;
