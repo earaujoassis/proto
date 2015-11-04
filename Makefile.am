@@ -13,6 +13,9 @@ libproto_la_LDFLAGS = \
 	-export-symbols-regex '^proto_' \
 	-version-info 11:0:7
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = proto.pc
+
 .PHONY: tests clean
 
 tests:

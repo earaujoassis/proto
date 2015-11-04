@@ -214,6 +214,39 @@ test_object_set_chain_calls ()
 }
 
 void
+test_object_set_chain_multiple_calls ()
+{
+  proto_object_t *object, *object_a, *object_b, *object_c;
+  short int value_a = 10, value_b = 20, value_c = 30;
+
+  describe ("Create object and assign keys in a chain and then call them");
+  object = proto_init_object ();
+  object->set_chain (object, "a.b.c.value_a", &value_a);
+  object->set_chain (object, "a.b.c.value_b", &value_b);
+  object->set_chain (object, "a.b.value_c", &value_c);
+  should_be_true (object->has_own_property (object, "a"));
+  object_a = object->get_own_property (object, "a");
+  should_be_true (object_a->has_own_property (object_a, "b"));
+  object_b = object_a->get_own_property (object_a, "b");
+  should_be_true (object_b->has_own_property (object_b, "c"));
+  object_c = object_b->get_own_property (object_b, "c");
+  should_be_true (object_c->has_own_property (object_c, "value_a"));
+  should_equal (*(short int *) object->get_chain (object, "a.b.c.value_a"), value_a);
+  should_equal (*(short int *) object_a->get_chain (object_a, "b.c.value_a"), value_a);
+  should_equal (*(short int *) object_b->get_chain (object_b, "c.value_a"), value_a);
+  should_equal (*(short int *) object_c->get_chain (object_c, "value_a"), value_a);
+  should_be_true (object_c->has_own_property (object_c, "value_b"));
+  should_equal (*(short int *) object->get_chain (object, "a.b.c.value_b"), value_b);
+  should_equal (*(short int *) object_a->get_chain (object_a, "b.c.value_b"), value_b);
+  should_equal (*(short int *) object_b->get_chain (object_b, "c.value_b"), value_b);
+  should_equal (*(short int *) object_c->get_chain (object_c, "value_b"), value_b);
+  should_equal (*(short int *) object->get_chain (object, "a.b.value_c"), value_c);
+  should_equal (*(short int *) object_a->get_chain (object_a, "b.value_c"), value_c);
+  should_equal (*(short int *) object_b->get_chain (object_b, "value_c"), value_c);
+  proto_del_object (object);
+}
+
+void
 test_object_set_chain_reassignments ()
 {
   proto_object_t *object;
@@ -254,6 +287,41 @@ test_object_execute_function ()
 }
 
 void
+test_object_merge ()
+{
+  proto_object_t *object_a, *object_b;
+  short int value_a = 10, value_b = 20, value_c = 30, value_d = 40;
+
+  describe ("Create two objects, assign some keys and then merge them");
+  object_a = proto_init_object ();
+  object_b = proto_init_object ();
+
+  object_a->set_own_property (object_a, "d", &value_d);
+  object_b->set_own_property (object_b, "a", &value_a);
+  object_b->set_own_property (object_b, "b", &value_b);
+  object_b->set_own_property (object_b, "c", &value_c);
+  should_be_true (object_a->has_own_property (object_a, "d"));
+  should_be_false (object_a->has_own_property (object_a, "a"));
+  should_be_false (object_a->has_own_property (object_a, "b"));
+  should_be_false (object_a->has_own_property (object_a, "c"));
+  should_be_true (object_b->has_own_property (object_b, "a"));
+  should_be_true (object_b->has_own_property (object_b, "b"));
+  should_be_true (object_b->has_own_property (object_b, "c"));
+  object_a->merge (object_a, object_b);
+  should_be_true (object_a->has_own_property (object_a, "a"));
+  should_be_true (object_a->has_own_property (object_a, "b"));
+  should_be_true (object_a->has_own_property (object_a, "c"));
+  should_be_true (object_a->has_own_property (object_a, "d"));
+  should_be_true (object_b->has_own_property (object_b, "a"));
+  should_be_true (object_b->has_own_property (object_b, "b"));
+  should_be_true (object_b->has_own_property (object_b, "c"));
+  should_be_false (object_b->has_own_property (object_b, "d"));
+
+  proto_del_object (object_a);
+  proto_del_object (object_b);
+}
+
+void
 run_tests ()
 {
   test_object_creation ();
@@ -264,6 +332,8 @@ run_tests ()
   test_object_deletion_of_key ();
   test_object_get_chain_calls ();
   test_object_set_chain_calls ();
+  test_object_set_chain_multiple_calls ();
   test_object_set_chain_reassignments ();
   test_object_execute_function ();
+  test_object_merge ();
 }

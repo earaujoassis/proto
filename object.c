@@ -20,8 +20,7 @@ typedef struct proto_hashmap_entry {
   const void *value;
   struct proto_hashmap_entry *left;
   struct proto_hashmap_entry *right;
-  bool should_free_value;
-  bool is_object;
+  bool is_internal_object;
 } proto_hashmap_entry_t;
 
 static unsigned long
@@ -50,11 +49,10 @@ proto_btree_insert (proto_hashmap_entry_t **root,
   if (!strcmp_value)
     {
       // Reassign value to object
-      if ((*root)->is_object && (*root)->should_free_value)
+      if ((*root)->is_internal_object)
         proto_del_object ((*root)->value);
       (*root)->value = item->value;
-      (*root)->should_free_value = false;
-      (*root)->is_object = false;
+      (*root)->is_internal_object = false;
     }
   if (strcmp_value < 0)
     proto_btree_insert (&(*root)->left, item);
@@ -86,8 +84,7 @@ proto_set_own_property (void *self,
   entry->value = value;
   entry->left = NULL;
   entry->right = NULL;
-  entry->should_free_value = false;
-  entry->is_object = false;
+  entry->is_internal_object = false;
   proto_btree_insert ((proto_hashmap_entry_t **) &object->prototype[hash], entry);
 }
 
@@ -183,8 +180,7 @@ proto_btree_delete (proto_hashmap_entry_t *root,
         {
           proto_hashmap_entry_t *garbage = proto_btree_find_minimal (root->right);
           root->value = garbage->value;
-          root->should_free_value = garbage->should_free_value;
-          root->is_object = garbage->is_object;
+          root->is_internal_object = garbage->is_internal_object;
           root->right = proto_btree_delete (root->right, key);
         }
     }
@@ -252,8 +248,7 @@ proto_set_chain (void *self,
               object->set_own_property (object, previous_key, new_object);
               hash = proto_hash_code (previous_key) % object->prototype_size;
               entry = proto_btree_retrieve ((proto_hashmap_entry_t **) &object->prototype[hash], previous_key);
-              entry->is_object = true;
-              entry->should_free_value = true;
+              entry->is_internal_object = true;
               value = new_object;
               free (previous_key);
               previous_key = NULL;
@@ -279,8 +274,7 @@ proto_set_chain (void *self,
       object->set_own_property (object, previous_key, new_object);
       hash = proto_hash_code (previous_key) % object->prototype_size;
       entry = proto_btree_retrieve ((proto_hashmap_entry_t **) &object->prototype[hash], previous_key);
-      entry->is_object = true;
-      entry->should_free_value = true;
+      entry->is_internal_object = true;
       value = new_object;
       free (previous_key);
       previous_key = NULL;
@@ -332,7 +326,7 @@ proto_get_chain (void *self,
   return value;
 }
 
-const void *
+static const void *
 proto_execute_property (void *self,
                         const char *key,
                         const void *arguments)
@@ -347,12 +341,57 @@ proto_execute_property (void *self,
   return NULL;
 }
 
-void
+static void
 proto_set_super (void *self,
                  const void *reference)
 {
   proto_object_t *object = (proto_object_t *) self;
   object->super = (proto_object_t *) reference;
+}
+
+static char **
+proto_btree_keys (size_t *number_of_keys,
+                  char **keys,
+                  const proto_hashmap_entry_t *root)
+{
+  if (root == NULL)
+    return keys;
+  proto_btree_keys (number_of_keys, keys, root->left);
+  proto_btree_keys (number_of_keys, keys, root->right);
+  *number_of_keys = (*number_of_keys) + 1;
+  keys = (char **) realloc (keys, (*number_of_keys) * sizeof (char *));
+  keys[(*number_of_keys) - 1] = root->key;
+  return keys;
+}
+
+static void
+proto_merge (void *self,
+             const void *reference)
+{
+  const proto_object_t *another = (const proto_object_t *) reference;
+  proto_object_t *object = (proto_object_t *) self;
+  proto_hashmap_entry_t *root;
+  size_t number_of_keys, prototype_size, i, j;
+  char **keys, *key;
+
+  prototype_size = another->prototype_size;
+  for (i = 0; i < prototype_size; i++)
+    {
+      keys = NULL;
+      number_of_keys = 0;
+      root = another->prototype[i];
+      keys = proto_btree_keys (&number_of_keys, keys, root);
+      if (keys != NULL)
+        {
+          for (j = 0; j < number_of_keys; j++)
+            {
+              key = keys[j];
+              const void *value = another->get_own_property (another, key);
+              object->set_own_property (object, key, value);
+            }
+          free (keys);
+        }
+    }
 }
 
 proto_object_t *
@@ -381,6 +420,7 @@ proto_init_object ()
   object->get_chain = &proto_get_chain;
   object->execute_property = &proto_execute_property;
   object->set_super = &proto_set_super;
+  object->merge = &proto_merge;
   return object;
 }
 
@@ -390,7 +430,7 @@ proto_del_hashmap_entry (proto_hashmap_entry_t *entry)
   if (entry != NULL) {
     proto_del_hashmap_entry (entry->left);
     proto_del_hashmap_entry (entry->right);
-    if (entry->is_object && entry->should_free_value)
+    if (entry->is_internal_object)
       proto_del_object (entry->value);
     free (entry->key);
     free (entry);

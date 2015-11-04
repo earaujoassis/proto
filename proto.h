@@ -88,6 +88,7 @@ typedef struct {
   void (*set_chain) (void *self, const char *keys, const void *value);
   const void *(*execute_property) (void *self, const char *key, const void *arguments);
   void (*set_super) (void *self, const void *reference);
+  void (*merge) (void *self, const void *reference);
 } proto_object_t;
 
 typedef struct {
