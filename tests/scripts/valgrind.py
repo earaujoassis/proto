@@ -10,5 +10,9 @@ from run import run_binaries
 
 
 if __name__ == '__main__':
-    code = run_binaries("valgrind --leak-check=yes --leak-check=full --show-leak-kinds=all --error-exitcode={0} -v".format(os.EX_SOFTWARE))
+    if ('CI' in os.environ and os.environ['CI'] == 'true'):
+        valgrind_wrapper = "valgrind --leak-check=full --error-exitcode={0} -v"
+    else:
+        valgrind_wrapper = "valgrind --track-origins=yes --leak-check=full --errors-for-leak-kinds=all --show-leak-kinds=all --error-exitcode={0} -v"
+    code = run_binaries(valgrind_wrapper.format(os.EX_SOFTWARE))
     sys.exit(code)
