@@ -368,7 +368,9 @@ test_array_stress ()
     }
   should_equal (array->length, 100);
   should_equal (*(short int *) array->first (array), 1);
+  should_equal (*(short int *) array->at (array, 24), 25);
   should_equal (*(short int *) array->at (array, 49), 50);
+  should_equal (*(short int *) array->at (array, 74), 75);
   should_equal (*(short int *) array->last (array), 100);
   for (i = 0; i < 100; i++)
     free ((short int *) array->pop (array));

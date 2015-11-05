@@ -295,7 +295,6 @@ test_object_merge ()
   describe ("Create two objects, assign some keys and then merge them");
   object_a = proto_init_object ();
   object_b = proto_init_object ();
-
   object_a->set_own_property (object_a, "d", &value_d);
   object_b->set_own_property (object_b, "a", &value_a);
   object_b->set_own_property (object_b, "b", &value_b);
@@ -316,7 +315,6 @@ test_object_merge ()
   should_be_true (object_b->has_own_property (object_b, "b"));
   should_be_true (object_b->has_own_property (object_b, "c"));
   should_be_false (object_b->has_own_property (object_b, "d"));
-
   proto_del_object (object_a);
   proto_del_object (object_b);
 }
@@ -330,7 +328,6 @@ test_object_merge_chain ()
   describe ("Create one object, assign some keys and then merge it with another object");
   object_a = proto_init_object ();
   object_b = proto_init_object ();
-
   object_a->set_own_property (object_a, "value_a", &value_a);
   object_a->set_chain (object_a, "tests.value_b", &value_b);
   object_a->set_chain (object_a, "tests.value_c", &value_b);
@@ -346,9 +343,38 @@ test_object_merge_chain ()
   should_be_true (object_b->has_own_property (object_b, "value_c"));
   should_be_false (object_b->has_own_property (object_b, "value_a"));
   should_be_false (object_b->has_own_property (object_b, "value_d"));
-
   proto_del_object (object_a);
   proto_del_object (object_b);
+}
+
+void
+test_object_merge_realcase ()
+{
+  describe ("Test a problematic case from another library");
+  proto_object_t *settings = proto_init_object ();
+  settings->set_own_property (settings, "population", NULL);
+  settings->set_own_property (settings, "generations", NULL);
+  settings->set_own_property (settings, "fitness", NULL);
+  settings->set_own_property (settings, "breed", NULL);
+  settings->set_chain (settings, "strategies.check_chrom", NULL);
+  settings->set_chain (settings, "strategies.recombination_strategy", NULL);
+  settings->set_chain (settings, "strategies.recombination.num_points", NULL);
+  settings->set_chain (settings, "strategies.recombination.xover_rate", NULL);
+  settings->set_chain (settings, "strategies.mutation_strategy", NULL);
+  settings->set_chain (settings, "strategies.mutation.chance", NULL);
+  settings->set_chain (settings, "strategies.selection_strategy", NULL);
+  settings->set_chain (settings, "strategies.selection.tournament_size", NULL);
+  settings->set_chain (settings, "strategies.selection.total_size", NULL);
+  settings->set_chain (settings, "strategies.replacement_policy", NULL);
+  settings->set_chain (settings, "strategies.ivf.recombination_strategy", NULL);
+  settings->set_chain (settings, "strategies.ivf.recombination.num_points", NULL);
+  settings->set_chain (settings, "strategies.ivf.num_parents", NULL);
+
+  proto_object_t *kw_arguments = proto_init_object ();
+  kw_arguments->merge (kw_arguments, settings->get_own_property (settings, "strategies"));
+  kw_arguments->set_own_property (kw_arguments, "fitness", NULL);
+  proto_del_object (kw_arguments);
+  proto_del_object (settings);
 }
 
 void
@@ -367,4 +393,5 @@ run_tests ()
   test_object_execute_function ();
   test_object_merge ();
   test_object_merge_chain ();
+  test_object_merge_realcase ();
 }

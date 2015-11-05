@@ -369,8 +369,8 @@ proto_btree_keys (size_t *number_of_keys,
 {
   if (root == NULL)
     return keys;
-  proto_btree_keys (number_of_keys, keys, root->left);
-  proto_btree_keys (number_of_keys, keys, root->right);
+  keys = proto_btree_keys (number_of_keys, keys, root->left);
+  keys = proto_btree_keys (number_of_keys, keys, root->right);
   *number_of_keys = (*number_of_keys) + 1;
   keys = (char **) realloc (keys, (*number_of_keys) * sizeof (char *));
   keys[(*number_of_keys) - 1] = root->key;
